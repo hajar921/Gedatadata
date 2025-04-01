@@ -1,0 +1,22 @@
+# Project Dependencies 
+# Core data processing libraries
+numpy
+pandas
+scipy
+
+# Visualization libraries
+matplotlib
+seaborn
+
+# Machine learning libraries
+scikit-learn
+joblib
+
+# Jupyter environment
+jupyter
+notebook
+ipykernel
+
+# Optional: Advanced visualization and ML
+plotly
+umap-learn
