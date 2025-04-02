@@ -20,3 +20,6 @@ ipykernel
 # Optional: Advanced visualization and ML
 plotly
 umap-learn
+
+# Data Balancing
+imblearn

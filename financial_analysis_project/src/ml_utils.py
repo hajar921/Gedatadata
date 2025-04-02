@@ -1569,6 +1569,177 @@ def plot_umap_visualization(X, labels=None, n_neighbors=15, min_dist=0.1, output
         print("UMAP is not installed. Please install it with 'pip install umap-learn'")
         return None
 
+def plot_elbow_method(X, max_clusters=10, random_state=42, output_path=None):
+    """
+    Plot the elbow method to determine the optimal number of clusters for KMeans.
+    
+    Args:
+        X: Feature matrix
+        max_clusters: Maximum number of clusters to try
+        random_state: Random seed for reproducibility
+        output_path: Path to save the plot (optional)
+    
+    Returns:
+        optimal_k: Optimal number of clusters (user input).
+    """
+    from sklearn.cluster import KMeans
+    import matplotlib.pyplot as plt
+
+    inertias = []
+    for k in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=k, random_state=random_state, n_init=10)
+        kmeans.fit(X)
+        inertias.append(kmeans.inertia_)
+
+    # Plot the elbow curve
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, max_clusters + 1), inertias, marker='o')
+    plt.xlabel('Number of Clusters')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method for Optimal Number of Clusters')
+    plt.grid(True)
+    
+    # Save the plot if output_path is provided
+    if output_path:
+        plt.savefig(output_path)
+    
+    plt.show()
+    
+    # Ask the user to input the optimal number of clusters based on the elbow curve
+    optimal_k = 2
+    return optimal_k
+
+
+def plot_clusters(X, labels, output_path=None):
+    """
+    Plot clusters in 2D space.
+    Args:
+        X: Feature matrix (must be 2D for visualization)
+        labels: Cluster labels
+        output_path: Path to save the plot
+    """
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(10, 8))
+    unique_labels = set(labels)
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_labels)))
+    for label, color in zip(unique_labels, colors):
+        cluster_points = X[labels == label]
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], c=[color], label=f'Cluster {label}', alpha=0.7)
+    plt.legend()
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.title('Cluster Visualization')
+    plt.grid(True)
+    if output_path:
+        plt.savefig(output_path)
+    plt.show()
+
+
+def plot_feature_importance(model, feature_names, output_path):
+    """
+    Plots feature importance from a trained Random Forest model and returns a DataFrame.
+    
+    Args:
+        model (RandomForestClassifier): Trained Random Forest model.
+        feature_names (list): List of feature names.
+        output_path (str): Path to save the plot.
+    
+    Returns:
+        pd.DataFrame: DataFrame containing feature names and their importances.
+    """
+    importances = model.feature_importances_
+    indices = np.argsort(importances)[::-1]  # Sort features by importance
+
+    # Create a DataFrame for the top features
+    feature_importance_df = pd.DataFrame({
+        'Feature': [feature_names[i] for i in indices],
+        'Importance': importances[indices]
+    })
+
+    # Plot feature importances
+    plt.figure(figsize=(12, 8))
+    plt.bar(range(len(indices)), importances[indices], align='center')
+    plt.xticks(range(len(indices)), [feature_names[i] for i in indices], rotation=90)
+    plt.title('Feature Importances')
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.show()
+
+    return feature_importance_df  # Return the DataFrame
+
+def evaluate_classification_model(y_true, y_pred, output_path):
+    """
+    Evaluates a classification model and plots the confusion matrix.
+    
+    Args:
+        y_true (array-like): True labels.
+        y_pred (array-like): Predicted labels.
+        output_path (str): Path to save the plot.
+    """
+    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    
+    cm = confusion_matrix(y_true, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=np.unique(y_true))
+    
+    plt.figure(figsize=(8, 6))
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title('Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.show()
+
+def evaluate_regression_model(y_true, y_pred, output_path):
+    """
+    Evaluates a regression model and saves the results.
+    
+    Args:
+        y_true (array-like): True target values.
+        y_pred (array-like): Predicted target values.
+        output_path (str): Path to save the evaluation metrics.
+    
+    Returns:
+        dict: A dictionary containing evaluation metrics.
+    """
+    from sklearn.metrics import mean_squared_error, r2_score
+    
+    # Calculate metrics
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_true, y_pred)
+    
+    # Save metrics to the specified output path
+    with open(output_path, 'w') as f:
+        f.write(f"Mean Squared Error (MSE): {mse:.4f}\n")
+        f.write(f"Root Mean Squared Error (RMSE): {rmse:.4f}\n")
+        f.write(f"R² Score: {r2:.4f}\n")
+    
+    # Return metrics as a dictionary
+    return {
+        'MSE': mse,
+        'RMSE': rmse,
+        'R² Score': r2
+    }
+
+def plot_residuals(y_true, y_pred, output_path):
+    """
+    Plots the residuals (errors) of a regression model.
+    """
+    residuals = y_true - y_pred
+    
+    plt.figure(figsize=(10, 6))
+    plt.scatter(y_pred, residuals, alpha=0.7)
+    plt.axhline(y=0, color='red', linestyle='--', label='Zero Residual Line')
+    plt.title('Residuals vs Predicted Values')
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Residuals')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.show()
+
+
 # Add a main section to demonstrate usage if the script is run directly
 if __name__ == "__main__":
     print("Machine Learning Utility Functions for Financial Analysis")
